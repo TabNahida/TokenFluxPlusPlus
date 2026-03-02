@@ -10,17 +10,25 @@ Releases: https://github.com/TabNahida/TokenFluxPlusPlus/releases
 
 ## Install
 
+From PyPI:
+
+```bash
+pip install tokenflux
+```
+
+From source (local repo):
+
 ```bash
 pip install .
 ```
 
-Editable install:
+Editable source install:
 
 ```bash
 pip install -e .
 ```
 
-`xmake` and a C++ toolchain are required because native modules are built from source.
+If no prebuilt wheel is available for your platform, installation falls back to source build and requires `xmake` + a C++ toolchain.
 
 ## Quickstart (Python)
 
