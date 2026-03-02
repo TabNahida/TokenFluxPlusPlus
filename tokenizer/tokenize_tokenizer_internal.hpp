@@ -4,9 +4,15 @@
 
 #include <string>
 
-namespace tokenflux::tokenize::detail
+namespace tokenflux
+{
+namespace tokenize
+{
+namespace detail
 {
 
 bool parse_tokenizer_json_content(const std::string &content, TokenizerData &out);
 
-} // namespace tokenflux::tokenize::detail
+} // namespace detail
+} // namespace tokenize
+} // namespace tokenflux

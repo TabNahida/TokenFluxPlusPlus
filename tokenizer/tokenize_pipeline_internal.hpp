@@ -12,7 +12,11 @@
 #include <unordered_map>
 #include <vector>
 
-namespace tokenflux::tokenize::detail
+namespace tokenflux
+{
+namespace tokenize
+{
+namespace detail
 {
 
 std::string make_tokenizer_fingerprint(const std::string &path);
@@ -40,4 +44,6 @@ bool process_file_to_shards(const FileTask &task, const Args &args, const Tokeni
                             std::size_t encode_threads, PartResult &result,
                             const std::function<void(std::uint64_t)> &report_docs, std::string &err);
 
-} // namespace tokenflux::tokenize::detail
+} // namespace detail
+} // namespace tokenize
+} // namespace tokenflux
