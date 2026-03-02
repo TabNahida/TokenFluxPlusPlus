@@ -310,7 +310,7 @@ class PythonTokenizer
 PYBIND11_MODULE(tokenflux_cpp, m)
 {
     m.doc() = "TokenFlux C++ bindings";
-    m.attr("__version__") = "0.3.2";
+    m.attr("__version__") = "0.3.3";
 
     py::enum_<TrainerKind>(m, "TrainerKind")
         .value("byte_bpe", TrainerKind::byte_bpe)
@@ -369,6 +369,7 @@ PYBIND11_MODULE(tokenflux_cpp, m)
         .def_readwrite("min_chars", &tokenflux::tokenize::Args::min_chars)
         .def_readwrite("max_chars", &tokenflux::tokenize::Args::max_chars)
         .def_readwrite("max_docs", &tokenflux::tokenize::Args::max_docs)
+        .def_readwrite("add_eos", &tokenflux::tokenize::Args::add_eos)
         .def_readwrite("eos_token", &tokenflux::tokenize::Args::eos_token)
         .def_readwrite("bos_token", &tokenflux::tokenize::Args::bos_token)
         .def_readwrite("progress_every", &tokenflux::tokenize::Args::progress_every)

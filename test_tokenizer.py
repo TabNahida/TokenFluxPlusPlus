@@ -1,4 +1,5 @@
 import contextlib
+import json
 import importlib
 import importlib.util
 import shutil
@@ -57,9 +58,10 @@ class TokenFluxPythonTests(unittest.TestCase):
         cfg = self.tf.TrainConfig()
         args = self.tf.TokenizeArgs()
 
-        self.assertEqual(self.tf.__version__, "0.3.2")
+        self.assertEqual(self.tf.__version__, "0.3.3")
         self.assertEqual(cfg.unk_token, "<|endoftext|>")
         self.assertEqual(cfg.special_tokens, ["<|endoftext|>"])
+        self.assertEqual(args.add_eos, True)
         self.assertEqual(args.eos_token, "<|endoftext|>")
         self.assertEqual(args.bos_token, "")
 
@@ -120,10 +122,14 @@ class TokenFluxPythonTests(unittest.TestCase):
             args.out_dir = str(out_dir)
             args.threads = 2
             args.resume = False
+            args.add_eos = False
             self.tf.tokenize(args, [str(sample)])
 
             self.assertTrue((out_dir / "meta.json").exists())
             self.assertTrue((out_dir / "shards").exists())
+            meta = json.loads((out_dir / "meta.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["add_eos"], False)
+            self.assertEqual(meta["layout"]["doc_boundary"], "none")
 
     def test_hf_tokenizers_can_load_generated_tokenizer(self):
         with self._tempdir() as tmp:

@@ -5,7 +5,7 @@
 - Training tokenizer models (`byte_bpe`, `bpe`, `wordpiece`, `unigram`)
 - High-throughput encoding and dataset pre-tokenization
 
-Latest release: **0.3.2**  
+Latest release: **0.3.3**  
 Releases: https://github.com/TabNahida/TokenFluxPlusPlus/releases
 
 ## Install
@@ -41,6 +41,11 @@ tok = tf.Tokenizer("tokenizer.json")
 ids = tok.encode("hello TokenFlux++")
 print(ids[:10], len(ids))
 ```
+
+## API Docs
+
+- C++ API: [docs/cpp_api.md](docs/cpp_api.md)
+- Python API: [docs/python_api.md](docs/python_api.md)
 
 ## Performance
 
@@ -88,9 +93,13 @@ xmake run TokenFluxTokenize \
   --data-list "data/inputs.list" \
   --tokenizer tokenizer.json \
   --out-dir data/tokens \
+  --add-eos \
   --threads 8 \
   --max-tokens-per-shard 50000000
 ```
+
+Tokenization output is a concatenated document stream in shard files.  
+`--add-eos` is enabled by default; use `--no-eos` to disable automatic EOS append per document.
 
 ## Build
 

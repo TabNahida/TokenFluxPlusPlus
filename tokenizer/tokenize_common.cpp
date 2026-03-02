@@ -45,6 +45,7 @@ void print_usage()
               << "  --min-chars <n>              Min chars per doc (default: 1)\n"
               << "  --max-chars <n>              Max chars per doc (default: 20000)\n"
               << "  --max-docs <n>               CLI compatibility only (must be 0)\n"
+              << "  --add-eos / --no-eos         Append EOS at end of each doc (default: --add-eos)\n"
               << "  --eos-token <tok>            EOS token (default: <|endoftext|>)\n"
               << "  --bos-token <tok>            BOS token (default: none)\n"
               << "  --threads <n>                Worker threads (0=auto)\n"
@@ -252,6 +253,16 @@ bool parse_args(int argc, char **argv, Args &args)
                 return false;
             }
             args.max_docs = x;
+            continue;
+        }
+        if (arg == "--add-eos")
+        {
+            args.add_eos = true;
+            continue;
+        }
+        if (arg == "--no-eos")
+        {
+            args.add_eos = false;
             continue;
         }
         if (arg == "--eos-token")

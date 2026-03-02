@@ -26,6 +26,7 @@ struct Args
     std::size_t min_chars = 1;
     std::size_t max_chars = 20'000;
     std::uint64_t max_docs = 0;
+    bool add_eos = true;
     std::string eos_token = "<|endoftext|>";
     std::string bos_token;
     std::uint64_t progress_every = 10'000;

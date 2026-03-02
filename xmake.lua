@@ -1,5 +1,5 @@
 set_project("TokenFlux")
-set_version("0.3.2")
+set_version("0.3.3")
 
 add_rules("mode.debug", "mode.release")
 set_languages("c++23")
@@ -48,7 +48,11 @@ target("TokenFluxTokenize")
         "tokenizer/TokenFluxTokenize.cpp",
         "tokenizer/input_source.cpp",
         "tokenizer/tokenize_common.cpp",
-        "tokenizer/tokenize_tokenizer.cpp",
+        "tokenizer/tokenize_tokenizer_parse.cpp",
+        "tokenizer/tokenize_tokenizer_load.cpp",
+        "tokenizer/tokenize_tokenizer_encode.cpp",
+        "tokenizer/tokenize_pipeline_state.cpp",
+        "tokenizer/tokenize_pipeline_process.cpp",
         "tokenizer/tokenize_pipeline.cpp",
         "tokenizer/tokenflux_lib.cpp"
     )
@@ -73,7 +77,11 @@ target("tokenflux_cpp")
         "tokenizer/train_backend_wordpiece.cpp",
         "tokenizer/train_backend_unigram.cpp",
         "tokenizer/tokenize_common.cpp",
-        "tokenizer/tokenize_tokenizer.cpp",
+        "tokenizer/tokenize_tokenizer_parse.cpp",
+        "tokenizer/tokenize_tokenizer_load.cpp",
+        "tokenizer/tokenize_tokenizer_encode.cpp",
+        "tokenizer/tokenize_pipeline_state.cpp",
+        "tokenizer/tokenize_pipeline_process.cpp",
         "tokenizer/tokenize_pipeline.cpp",
         "tokenizer/tokenflux_pybind.cpp"
     )

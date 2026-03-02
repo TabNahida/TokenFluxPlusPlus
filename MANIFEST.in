@@ -5,3 +5,4 @@ include pyproject.toml
 include xmake.lua
 recursive-include tokenflux *.py
 recursive-include tokenizer *.cpp *.hpp
+recursive-include docs *.md
