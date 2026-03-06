@@ -7,6 +7,8 @@ from tokenflux_cpp import (
     tokenize,
     train,
 )
+from tokenflux.analyzer import TokenAnalyzer
+from tokenflux.visualizer import TokenVisualizer
 
 __all__ = [
     "__version__",
@@ -16,4 +18,6 @@ __all__ = [
     "TrainerKind",
     "tokenize",
     "train",
+    "TokenAnalyzer",
+    "TokenVisualizer",
 ]

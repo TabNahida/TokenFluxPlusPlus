@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace tokenflux
@@ -19,8 +20,14 @@ class TokenizerEncoder
     std::size_t vocab_size() const;
     std::string model_name() const;
     bool token_to_id(const std::string &token, std::uint32_t &id) const;
+    std::string id_to_token(std::uint32_t id) const;
     void encode_text_append(const std::string &text, std::unordered_map<std::string, std::vector<std::uint32_t>> &cache,
                             std::vector<std::uint32_t> &out_ids) const;
+    std::string decode(const std::vector<std::uint32_t> &token_ids, bool skip_special_tokens = false,
+                       bool clean_up_tokenization_spaces = true) const;
+    std::vector<std::string> decode_batch(const std::vector<std::vector<std::uint32_t>> &token_ids_batch,
+                                          bool skip_special_tokens = false,
+                                          bool clean_up_tokenization_spaces = true) const;
 
   private:
     struct UnigramTokenState
@@ -55,6 +62,15 @@ class TokenizerEncoder
     std::vector<UnigramTokenState> unigram_tokens_;
     std::unordered_map<std::string, std::vector<std::size_t>> unigram_index_;
     std::array<std::string, 256> byte_to_unicode_{};
+
+    // id to token mapping for decoding
+    std::vector<std::string> id_to_token_list_;
+    std::unordered_set<std::uint32_t> special_token_ids_;
+    std::unordered_map<std::uint32_t, std::uint8_t> unicode_to_byte_;
+
+    // decode helper methods
+    std::string byte_level_decode(const std::string &token) const;
+    std::string clean_up_tokenization(const std::string &text) const;
 };
 
 } // namespace tokenize

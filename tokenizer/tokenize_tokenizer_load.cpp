@@ -128,8 +128,45 @@ bool TokenizerEncoder::load(const std::string &path, std::string &err)
         }
     }
 
+    // Build id_to_token_list_ for decoding
+    id_to_token_list_.resize(vocab_.size());
+    for (const auto &kv : vocab_)
+    {
+        if (kv.second < id_to_token_list_.size())
+        {
+            id_to_token_list_[kv.second] = kv.first;
+        }
+    }
+
+    // Build unicode_to_byte_ mapping for byte-level decoding
+    unicode_to_byte_.clear();
+    for (std::size_t i = 0; i < byte_to_unicode_.size(); ++i)
+    {
+        if (!byte_to_unicode_[i].empty())
+        {
+            // Get the Unicode code point of the character
+            std::size_t pos = 0;
+            std::uint32_t unicode_cp = 0;
+            if (next_codepoint(byte_to_unicode_[i], pos, unicode_cp))
+            {
+                unicode_to_byte_[unicode_cp] = static_cast<std::uint8_t>(i);
+            }
+        }
+    }
+
+    // Identify special token IDs (common special tokens)
+    special_token_ids_.clear();
+    std::vector<std::string> special_tokens = {"<unk>", "<s>", "</s>", "<pad>", "<cls>", "<sep>"};
+    for (const auto &special : special_tokens)
+    {
+        auto it = vocab_.find(special);
+        if (it != vocab_.end())
+        {
+            special_token_ids_.insert(it->second);
+        }
+    }
+
     return true;
 }
 
 } // namespace tokenflux::tokenize
-

@@ -5,7 +5,7 @@
 - Training tokenizer models (`byte_bpe`, `bpe`, `wordpiece`, `unigram`)
 - High-throughput encoding and dataset pre-tokenization
 
-Latest release: **0.3.3**  
+Latest release: **0.3.4**  
 Releases: https://github.com/TabNahida/TokenFluxPlusPlus/releases
 
 ## Install

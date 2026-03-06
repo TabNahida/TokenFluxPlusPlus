@@ -79,8 +79,9 @@ class PythonTokenizer
         return encode_impl(text, bos_id, eos_id, cache_);
     }
 
-    std::vector<std::vector<std::uint32_t>> encode_batch(const std::vector<std::string> &texts, const std::string &bos_token,
-                                                         const std::string &eos_token, bool reset_cache)
+    std::vector<std::vector<std::uint32_t>> encode_batch(const std::vector<std::string> &texts,
+                                                         const std::string &bos_token, const std::string &eos_token,
+                                                         bool reset_cache)
     {
         if (reset_cache)
         {
@@ -142,6 +143,23 @@ class PythonTokenizer
         return out;
     }
 
+    std::string decode(const std::vector<std::uint32_t> &token_ids, bool skip_special_tokens,
+                       bool clean_up_tokenization_spaces) const
+    {
+        return encoder_.decode(token_ids, skip_special_tokens, clean_up_tokenization_spaces);
+    }
+
+    std::vector<std::string> decode_batch(const std::vector<std::vector<std::uint32_t>> &token_ids_batch,
+                                          bool skip_special_tokens, bool clean_up_tokenization_spaces) const
+    {
+        return encoder_.decode_batch(token_ids_batch, skip_special_tokens, clean_up_tokenization_spaces);
+    }
+
+    std::string id_to_token(std::uint32_t id) const
+    {
+        return encoder_.id_to_token(id);
+    }
+
     py::dict tokenize_inputs_to_torch(const std::vector<std::string> &inputs, const std::string &text_field,
                                       std::size_t min_chars, std::size_t max_chars, const std::string &bos_token,
                                       const std::string &eos_token, const std::string &dtype, bool reset_cache)
@@ -199,7 +217,8 @@ class PythonTokenizer
                 local_err);
             if (!ok)
             {
-                throw std::runtime_error(local_err.empty() ? ("failed to read input file: " + source.source) : local_err);
+                throw std::runtime_error(local_err.empty() ? ("failed to read input file: " + source.source)
+                                                           : local_err);
             }
         }
 
@@ -301,6 +320,13 @@ class PythonTokenizer
         return out;
     }
 
+    py::list get_vocab_list() const
+    {
+        py::list vocab_list;
+        // This will be implemented in the C++ side
+        return vocab_list;
+    }
+
     tokenflux::tokenize::TokenizerEncoder encoder_;
     std::unordered_map<std::string, std::vector<std::uint32_t>> cache_;
     std::string tokenizer_path_;
@@ -387,12 +413,10 @@ PYBIND11_MODULE(tokenflux_cpp, m)
         .def_property_readonly("vocab_size", &PythonTokenizer::vocab_size)
         .def_property_readonly("model_name", &PythonTokenizer::model_name)
         .def("token_to_id", &PythonTokenizer::token_to_id, py::arg("token"))
-        .def("encode", &PythonTokenizer::encode, py::arg("text"), py::arg("bos_token") = "",
-             py::arg("eos_token") = "", py::arg("reset_cache") = false,
-             py::call_guard<py::gil_scoped_release>())
+        .def("encode", &PythonTokenizer::encode, py::arg("text"), py::arg("bos_token") = "", py::arg("eos_token") = "",
+             py::arg("reset_cache") = false, py::call_guard<py::gil_scoped_release>())
         .def("encode_batch", &PythonTokenizer::encode_batch, py::arg("texts"), py::arg("bos_token") = "",
-             py::arg("eos_token") = "", py::arg("reset_cache") = false,
-             py::call_guard<py::gil_scoped_release>())
+             py::arg("eos_token") = "", py::arg("reset_cache") = false, py::call_guard<py::gil_scoped_release>())
         .def("encode_to_torch", &PythonTokenizer::encode_to_torch, py::arg("text"), py::arg("bos_token") = "",
              py::arg("eos_token") = "", py::arg("dtype") = "int64", py::arg("reset_cache") = false)
         .def("encode_batch_to_torch", &PythonTokenizer::encode_batch_to_torch, py::arg("texts"),
@@ -401,29 +425,37 @@ PYBIND11_MODULE(tokenflux_cpp, m)
         .def("tokenize_inputs_to_torch", &PythonTokenizer::tokenize_inputs_to_torch, py::arg("inputs"),
              py::arg("text_field") = "text", py::arg("min_chars") = 1, py::arg("max_chars") = 20000,
              py::arg("bos_token") = "", py::arg("eos_token") = "", py::arg("dtype") = "int64",
-             py::arg("reset_cache") = false);
+             py::arg("reset_cache") = false)
+        .def("decode", &PythonTokenizer::decode, py::arg("token_ids"), py::arg("skip_special_tokens") = false,
+             py::arg("clean_up_tokenization_spaces") = true, py::call_guard<py::gil_scoped_release>())
+        .def("decode_batch", &PythonTokenizer::decode_batch, py::arg("token_ids_batch"),
+             py::arg("skip_special_tokens") = false, py::arg("clean_up_tokenization_spaces") = true,
+             py::call_guard<py::gil_scoped_release>())
+        .def("id_to_token", &PythonTokenizer::id_to_token, py::arg("id"), py::call_guard<py::gil_scoped_release>());
 
-    m.def("train",
-          [](Config cfg, const std::vector<std::string> &inputs) {
-              cfg.input_entries = inputs;
-              py::gil_scoped_release release;
-              int rc = run_train(std::move(cfg));
-              if (rc != 0)
-              {
-                  throw std::runtime_error("TokenFlux train failed");
-              }
-          },
-          py::arg("config"), py::arg("inputs") = std::vector<std::string>{});
+    m.def(
+        "train",
+        [](Config cfg, const std::vector<std::string> &inputs) {
+            cfg.input_entries = inputs;
+            py::gil_scoped_release release;
+            int rc = run_train(std::move(cfg));
+            if (rc != 0)
+            {
+                throw std::runtime_error("TokenFlux train failed");
+            }
+        },
+        py::arg("config"), py::arg("inputs") = std::vector<std::string>{});
 
-    m.def("tokenize",
-          [](tokenflux::tokenize::Args args, const std::vector<std::string> &inputs) {
-              args.input_entries = inputs;
-              py::gil_scoped_release release;
-              int rc = tokenflux::tokenize::run_tokenize(args);
-              if (rc != 0)
-              {
-                  throw std::runtime_error("TokenFlux tokenize failed");
-              }
-          },
-          py::arg("args"), py::arg("inputs") = std::vector<std::string>{});
+    m.def(
+        "tokenize",
+        [](tokenflux::tokenize::Args args, const std::vector<std::string> &inputs) {
+            args.input_entries = inputs;
+            py::gil_scoped_release release;
+            int rc = tokenflux::tokenize::run_tokenize(args);
+            if (rc != 0)
+            {
+                throw std::runtime_error("TokenFlux tokenize failed");
+            }
+        },
+        py::arg("args"), py::arg("inputs") = std::vector<std::string>{});
 }

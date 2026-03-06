@@ -80,6 +80,7 @@ target("tokenflux_cpp")
         "tokenizer/tokenize_tokenizer_parse.cpp",
         "tokenizer/tokenize_tokenizer_load.cpp",
         "tokenizer/tokenize_tokenizer_encode.cpp",
+        "tokenizer/tokenize_tokenizer_decode.cpp",
         "tokenizer/tokenize_pipeline_state.cpp",
         "tokenizer/tokenize_pipeline_process.cpp",
         "tokenizer/tokenize_pipeline.cpp",
