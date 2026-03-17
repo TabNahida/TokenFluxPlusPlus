@@ -58,7 +58,7 @@ class TokenFluxPythonTests(unittest.TestCase):
         cfg = self.tf.TrainConfig()
         args = self.tf.TokenizeArgs()
 
-        self.assertEqual(self.tf.__version__, "0.3.3")
+        self.assertEqual(self.tf.__version__, "0.3.4")
         self.assertEqual(cfg.unk_token, "<|endoftext|>")
         self.assertEqual(cfg.special_tokens, ["<|endoftext|>"])
         self.assertEqual(args.add_eos, True)
@@ -101,6 +101,12 @@ class TokenFluxPythonTests(unittest.TestCase):
             ids = tok.encode("hello world")
             self.assertTrue(ids)
             self.assertTrue(all(isinstance(x, int) for x in ids))
+            decoded = tok.decode(ids)
+            self.assertEqual(decoded, "hello world")
+            self.assertEqual(tok.encode(decoded), ids)
+
+            decoded_batch = tok.decode_batch([ids, tok.encode("token flux")])
+            self.assertEqual(decoded_batch, ["hello world", "token flux"])
 
             encoded = tok.encode_to_torch("hello world")
             self.assertEqual(tuple(encoded.shape), (len(ids),))

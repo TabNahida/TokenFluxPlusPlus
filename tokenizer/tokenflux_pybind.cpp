@@ -336,7 +336,7 @@ class PythonTokenizer
 PYBIND11_MODULE(tokenflux_cpp, m)
 {
     m.doc() = "TokenFlux C++ bindings";
-    m.attr("__version__") = "0.3.3";
+    m.attr("__version__") = "0.3.4";
 
     py::enum_<TrainerKind>(m, "TrainerKind")
         .value("byte_bpe", TrainerKind::byte_bpe)

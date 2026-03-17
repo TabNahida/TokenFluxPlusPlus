@@ -8,6 +8,16 @@
 Latest release: **0.3.4**  
 Releases: https://github.com/TabNahida/TokenFluxPlusPlus/releases
 
+## Contents
+
+- [Install](#install)
+- [Quickstart (Python)](#quickstart-python)
+- [API Docs](#api-docs)
+- [Performance](#performance)
+- [CLI](#cli)
+- [Build](#build)
+- [Notes](#notes)
+
 ## Install
 
 From PyPI:
@@ -48,6 +58,10 @@ tf.train(cfg, ["data/train.jsonl"])
 tok = tf.Tokenizer("tokenizer.json")
 ids = tok.encode("hello TokenFlux++")
 print(ids[:10], len(ids))
+
+# decode
+text = tok.decode(ids)
+print(text)
 ```
 
 ## API Docs
@@ -68,6 +82,12 @@ python -m pip install tiktoken
 python -m pip install tokenizers
 ```
 
+Benchmark notes:
+
+- TokenFlux++ encode and decode both use the native `tf.Tokenizer` implementation.
+- HuggingFace tokenizers and OpenAI tiktoken are measured with their own native encode/decode paths.
+- Train benchmark compares `TokenFlux++` vs `HuggingFace tokenizers` because `tiktoken` does not provide training.
+
 Snapshot — encode throughput (docs/s) by thread count (higher is better):
 
 ![Encode Throughput by threads](benchmarks/thread_throughput.png)
@@ -79,6 +99,8 @@ Latest encode latency speedup:
 
 Full benchmark report:  
 [benchmarks/BENCHMARK_RESULTS_2026-03-01.md](benchmarks/BENCHMARK_RESULTS_2026-03-01.md)
+
+The linked report is a historical snapshot. After the native TokenFlux++ decoder benchmark update, rerun the script to refresh decode numbers.
 
 ## CLI
 

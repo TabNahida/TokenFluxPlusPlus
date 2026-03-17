@@ -60,6 +60,11 @@ class Tokenizer
         return encoder_.token_to_id(token, id);
     }
 
+    std::string id_to_token(std::uint32_t id) const
+    {
+        return encoder_.id_to_token(id);
+    }
+
     void clear_cache()
     {
         cache_.clear();
@@ -116,6 +121,19 @@ class Tokenizer
             out.push_back(std::move(ids));
         }
         return out;
+    }
+
+    std::string decode(const std::vector<std::uint32_t> &token_ids, bool skip_special_tokens = false,
+                       bool clean_up_tokenization_spaces = true) const
+    {
+        return encoder_.decode(token_ids, skip_special_tokens, clean_up_tokenization_spaces);
+    }
+
+    std::vector<std::string> decode_batch(const std::vector<std::vector<std::uint32_t>> &token_ids_batch,
+                                          bool skip_special_tokens = false,
+                                          bool clean_up_tokenization_spaces = true) const
+    {
+        return encoder_.decode_batch(token_ids_batch, skip_special_tokens, clean_up_tokenization_spaces);
     }
 
   private:

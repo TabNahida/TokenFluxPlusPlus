@@ -1,5 +1,7 @@
 # Benchmark Results (2026-03-01)
 
+Note: this snapshot was recorded before the benchmark switched TokenFlux++ decode to the native decoder path. Re-run the benchmark script for current decode numbers.
+
 Command:
 
 ```bash
@@ -73,4 +75,5 @@ Config: `threads=[1,2,4,8,16]`, `warmup=1`, `repeat=2`
 | 4 | 1.2912 | 6.6026 | 14.9484 | 154,900 | 30,291 | 13,379 | TokenFlux++ |
 | 8 | 0.8943 | 6.1996 | 14.9420 | 223,631 | 32,260 | 13,385 | TokenFlux++ |
 | 16 | 0.8135 | 6.0737 | 15.1337 | 245,839 | 32,929 | 13,216 | TokenFlux++ |
+
 

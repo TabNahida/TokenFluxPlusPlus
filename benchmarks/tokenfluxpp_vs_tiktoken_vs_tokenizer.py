@@ -372,6 +372,12 @@ def _decode_hf_batch(hf_tok, batch_ids: list[list[int]]) -> list[str]:
     return [hf_tok.decode(ids) for ids in batch_ids]
 
 
+def _decode_tokenflux_batch(tf_tok, batch_ids: list[list[int]]) -> list[str]:
+    if hasattr(tf_tok, "decode_batch"):
+        return tf_tok.decode_batch(batch_ids)
+    return [tf_tok.decode(ids) for ids in batch_ids]
+
+
 def _make_tiktoken_runner(encoding, docs: list[str], threads: int) -> Callable[[], int]:
     def run() -> int:
         batch = _encode_tiktoken_batch(encoding, docs, threads)
@@ -431,6 +437,31 @@ def _make_hf_decode_runner(hf_tokenizers_mod, tokenizer_path: Path, batch_ids: l
     def run() -> int:
         with ThreadPoolExecutor(max_workers=len(chunks)) as pool:
             futures = [pool.submit(_decode_hf_batch, tok, chunk) for tok, chunk in zip(toks, chunks)]
+            for future in futures:
+                future.result()
+        return total_tokens
+
+    return run
+
+
+def _make_tokenflux_decode_runner(tf, tokenizer_path: Path, batch_ids: list[list[int]], workers: int) -> Callable[[], int]:
+    total_tokens = sum(len(ids) for ids in batch_ids)
+    workers = max(1, workers)
+    if workers == 1 or len(batch_ids) <= 1:
+        tok = tf.Tokenizer(str(tokenizer_path))
+
+        def run() -> int:
+            _decode_tokenflux_batch(tok, batch_ids)
+            return total_tokens
+
+        return run
+
+    chunks = _split_docs(batch_ids, workers)
+    tokenizers = [tf.Tokenizer(str(tokenizer_path)) for _ in chunks]
+
+    def run() -> int:
+        with ThreadPoolExecutor(max_workers=len(chunks)) as pool:
+            futures = [pool.submit(_decode_tokenflux_batch, tok, chunk) for tok, chunk in zip(tokenizers, chunks)]
             for future in futures:
                 future.result()
         return total_tokens
@@ -519,7 +550,7 @@ def _fmti(value: float) -> str:
 
 
 def _parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Benchmark TokenFlux++ vs OpenAI tiktoken.")
+    p = argparse.ArgumentParser(description="Benchmark TokenFlux++ vs OpenAI tiktoken vs HuggingFace tokenizers.")
     p.add_argument("--docs", type=int, default=200000)
     p.add_argument("--min-phrases", type=int, default=3)
     p.add_argument("--max-phrases", type=int, default=12)
@@ -795,7 +826,7 @@ def main() -> None:
         hf_encoded_batch = [item.ids for item in hf_tok_for_decode.encode_batch(docs)]
 
     if args.benchmark_decode:
-        tf_decode_runner = _make_hf_decode_runner(hf_tokenizers, tokenizer_path, tf_encoded_batch, tf_threads)
+        tf_decode_runner = _make_tokenflux_decode_runner(tf, tokenizer_path, tf_encoded_batch, tf_threads)
         tf_decode_result = _run_benchmark(
             name=f"TokenFlux++ decode (threads={tf_threads})",
             runner=tf_decode_runner,
@@ -855,7 +886,6 @@ def main() -> None:
     if check_n > 0:
         print("")
         print(f"Round-trip correctness check: samples={check_n:,}")
-        hf_tok_tf = _create_hf_tokenizer(hf_tokenizers, tokenizer_path)
         hf_tok_hf = _create_hf_tokenizer(hf_tokenizers, hf_tokenizer_path)
         tf_tok_for_check = tf.Tokenizer(str(tokenizer_path))
 
@@ -871,7 +901,7 @@ def main() -> None:
             tk_ids = tk_encoded_batch[idx]
             hf_ids = hf_encoded_batch[idx]
 
-            tf_text = hf_tok_tf.decode(tf_ids)
+            tf_text = tf_tok_for_check.decode(tf_ids)
             tk_text = enc.decode(tk_ids)
             hf_text = hf_tok_hf.decode(hf_ids)
 
@@ -1114,3 +1144,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
