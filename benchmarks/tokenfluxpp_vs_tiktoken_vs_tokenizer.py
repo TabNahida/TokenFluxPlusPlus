@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_TOKENIZER_PATH = ROOT / "artifacts" / "benchmark_tokenizer.json"
 DEFAULT_HF_TOKENIZER_PATH = ROOT / "artifacts" / "benchmark_tokenizer_hf.json"
 SNIPPETS = [
-    "TokenFlux++ focuses on low-latency tokenizer inference for production data pipelines.",
+    "TokenFlux focuses on low-latency tokenizer inference for production data pipelines.",
     "The runtime is implemented in C++ and exposed to Python through pybind bindings.",
     "Stable throughput under mixed document sizes is critical for pretraining workloads.",
     "Work stealing and bounded queues keep worker utilization high on multi-core CPUs.",
@@ -550,7 +550,7 @@ def _fmti(value: float) -> str:
 
 
 def _parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Benchmark TokenFlux++ vs OpenAI tiktoken vs HuggingFace tokenizers.")
+    p = argparse.ArgumentParser(description="Benchmark TokenFlux vs OpenAI tiktoken vs HuggingFace tokenizers.")
     p.add_argument("--docs", type=int, default=200000)
     p.add_argument("--min-phrases", type=int, default=3)
     p.add_argument("--max-phrases", type=int, default=12)
@@ -609,7 +609,7 @@ def main() -> None:
         if not args.bootstrap_tokenizer:
             raise RuntimeError(f"Tokenizer not found: {tokenizer_path}")
         bootstrap_docs = docs[: max(1, min(len(docs), args.bootstrap_docs))]
-        print(f"[setup] Training TokenFlux++ tokenizer -> {tokenizer_path}")
+        print(f"[setup] Training TokenFlux tokenizer -> {tokenizer_path}")
         _bootstrap_tokenizer(
             tf,
             tokenizer_path=tokenizer_path,
@@ -668,7 +668,7 @@ def main() -> None:
                     out_path.unlink()
 
         train_result = _run_timing(
-            name=f"TokenFlux++ train (threads={train_threads})",
+            name=f"TokenFlux train (threads={train_threads})",
             runner=run_train_once,
             warmup=args.train_warmup,
             repeat=args.train_repeat,
@@ -704,7 +704,7 @@ def main() -> None:
     tk_runner = _make_tiktoken_runner(enc, docs, tk_threads)
 
     tf_result = _run_benchmark(
-        name=f"TokenFlux++ (threads={tf_threads})",
+        name=f"TokenFlux (threads={tf_threads})",
         runner=tf_runner,
         warmup=args.warmup,
         repeat=args.repeat,
@@ -731,9 +731,9 @@ def main() -> None:
 
     print(f"Workload: docs={len(docs):,}, chars={chars:,}, avg_chars/doc={chars / len(docs):.1f}")
     if tf_mode == "auto":
-        print(f"TokenFlux++ baseline threads: auto -> {tf_threads}")
+        print(f"TokenFlux baseline threads: auto -> {tf_threads}")
     else:
-        print(f"TokenFlux++ baseline threads: {tf_threads}")
+        print(f"TokenFlux baseline threads: {tf_threads}")
     if hf_mode == "auto":
         print(f"HuggingFace tokenizers baseline threads: auto -> {hf_threads}")
     else:
@@ -805,14 +805,14 @@ def main() -> None:
 
     speed_ratio = tk_result.mean_latency / tf_result.mean_latency
     if speed_ratio >= 1.0:
-        print(f"Latency speedup: TokenFlux++ is {speed_ratio:.2f}x faster than OpenAI tiktoken.")
+        print(f"Latency speedup: TokenFlux is {speed_ratio:.2f}x faster than OpenAI tiktoken.")
     else:
-        print(f"Latency speedup: OpenAI tiktoken is {(1.0 / speed_ratio):.2f}x faster than TokenFlux++.")
+        print(f"Latency speedup: OpenAI tiktoken is {(1.0 / speed_ratio):.2f}x faster than TokenFlux.")
     hf_speed_ratio = hf_result.mean_latency / tf_result.mean_latency
     if hf_speed_ratio >= 1.0:
-        print(f"Latency speedup: TokenFlux++ is {hf_speed_ratio:.2f}x faster than HuggingFace tokenizers.")
+        print(f"Latency speedup: TokenFlux is {hf_speed_ratio:.2f}x faster than HuggingFace tokenizers.")
     else:
-        print(f"Latency speedup: HuggingFace tokenizers is {(1.0 / hf_speed_ratio):.2f}x faster than TokenFlux++.")
+        print(f"Latency speedup: HuggingFace tokenizers is {(1.0 / hf_speed_ratio):.2f}x faster than TokenFlux.")
 
     decode_results: list[BenchmarkResult] = []
     tf_encoded_batch: list[list[int]] = []
@@ -828,7 +828,7 @@ def main() -> None:
     if args.benchmark_decode:
         tf_decode_runner = _make_tokenflux_decode_runner(tf, tokenizer_path, tf_encoded_batch, tf_threads)
         tf_decode_result = _run_benchmark(
-            name=f"TokenFlux++ decode (threads={tf_threads})",
+            name=f"TokenFlux decode (threads={tf_threads})",
             runner=tf_decode_runner,
             warmup=args.warmup,
             repeat=args.repeat,
@@ -931,7 +931,7 @@ def main() -> None:
         }
 
         rows = [
-            ["TokenFlux++", str(check_n), str(tf_ok), _fmtf(100.0 * tf_ok / check_n) + "%"],
+            ["TokenFlux", str(check_n), str(tf_ok), _fmtf(100.0 * tf_ok / check_n) + "%"],
             ["OpenAI tiktoken", str(check_n), str(tk_ok), _fmtf(100.0 * tk_ok / check_n) + "%"],
             ["HuggingFace tokenizers", str(check_n), str(hf_ok), _fmtf(100.0 * hf_ok / check_n) + "%"],
         ]
@@ -939,8 +939,8 @@ def main() -> None:
         _print_table(
             ["Pair", "Text agreement rate"],
             [
-                ["TokenFlux++ vs OpenAI tiktoken", _fmtf(100.0 * agree_tf_tk / check_n) + "%"],
-                ["TokenFlux++ vs HuggingFace tokenizers", _fmtf(100.0 * agree_tf_hf / check_n) + "%"],
+                ["TokenFlux vs OpenAI tiktoken", _fmtf(100.0 * agree_tf_tk / check_n) + "%"],
+                ["TokenFlux vs HuggingFace tokenizers", _fmtf(100.0 * agree_tf_hf / check_n) + "%"],
                 ["OpenAI tiktoken vs HuggingFace tokenizers", _fmtf(100.0 * agree_tk_hf / check_n) + "%"],
             ],
         )
@@ -971,7 +971,7 @@ def main() -> None:
     thread_results: list[dict[str, object]] = []
     for th in thread_points:
         tf_point = _run_benchmark(
-            name=f"TokenFlux++ (threads={th})",
+            name=f"TokenFlux (threads={th})",
             runner=_make_tokenflux_runner(tf, tokenizer_path, docs, th),
             warmup=args.sweep_warmup,
             repeat=args.sweep_repeat,
@@ -981,7 +981,7 @@ def main() -> None:
         tk_point = tk_by_thread[th]
         hf_point = hf_by_thread[th]
         contenders = [
-            ("TokenFlux++", tf_point.mean_latency),
+            ("TokenFlux", tf_point.mean_latency),
             ("OpenAI tiktoken", tk_point.mean_latency),
             ("HuggingFace tokenizers", hf_point.mean_latency),
         ]
@@ -1028,10 +1028,10 @@ def main() -> None:
     _print_table(
         [
             "Threads",
-            "TokenFlux++ latency (s)",
+            "TokenFlux latency (s)",
             "tiktoken latency (s)",
             "tokenizers latency (s)",
-            "TokenFlux++ docs/s",
+            "TokenFlux docs/s",
             "tiktoken docs/s",
             "tokenizers docs/s",
             "Faster",

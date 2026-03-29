@@ -303,7 +303,7 @@ cfg.output_merges = "merges.txt"
 tf.train(cfg, ["data/train.jsonl"])
 
 tok = tf.Tokenizer("tokenizer.json")
-ids = tok.encode("hello TokenFlux++")
+ids = tok.encode("hello TokenFlux")
 text = tok.decode(ids)
 print(ids)
 print(text)

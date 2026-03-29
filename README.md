@@ -1,6 +1,6 @@
-# TokenFlux++
+# TokenFlux
 
-`TokenFlux++` is a fast tokenizer toolkit (C++ core + Python bindings) for:
+`TokenFlux` is a fast tokenizer toolkit (C++ core + Python bindings) for:
 
 - Training tokenizer models (`byte_bpe`, `bpe`, `wordpiece`, `unigram`)
 - High-throughput encoding and dataset pre-tokenization
@@ -56,7 +56,7 @@ tf.train(cfg, ["data/train.jsonl"])
 
 # encode
 tok = tf.Tokenizer("tokenizer.json")
-ids = tok.encode("hello TokenFlux++")
+ids = tok.encode("hello TokenFlux")
 print(ids[:10], len(ids))
 
 # decode
@@ -84,9 +84,9 @@ python -m pip install tokenizers
 
 Benchmark notes:
 
-- TokenFlux++ encode and decode both use the native `tf.Tokenizer` implementation.
+- TokenFlux encode and decode both use the native `tf.Tokenizer` implementation.
 - HuggingFace tokenizers and OpenAI tiktoken are measured with their own native encode/decode paths.
-- Train benchmark compares `TokenFlux++` vs `HuggingFace tokenizers` because `tiktoken` does not provide training.
+- Train benchmark compares `TokenFlux` vs `HuggingFace tokenizers` because `tiktoken` does not provide training.
 
 Snapshot — encode throughput (docs/s) by thread count (higher is better):
 
@@ -100,7 +100,7 @@ Latest encode latency speedup:
 Full benchmark report:  
 [benchmarks/BENCHMARK_RESULTS_2026-03-01.md](benchmarks/BENCHMARK_RESULTS_2026-03-01.md)
 
-The linked report is a historical snapshot. After the native TokenFlux++ decoder benchmark update, rerun the script to refresh decode numbers.
+The linked report is a historical snapshot. After the native TokenFlux decoder benchmark update, rerun the script to refresh decode numbers.
 
 ## CLI
 
